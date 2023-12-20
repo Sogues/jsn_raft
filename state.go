@@ -26,6 +26,10 @@ type (
 	}
 )
 
+func (s *persistentState) storeLog([]JLog) {
+
+}
+
 func (s *persistentState) getLog(index uint64) JLog {
 	for _, v := range s.logs {
 		if v.Index() == index {
@@ -37,35 +41,22 @@ func (s *persistentState) getLog(index uint64) JLog {
 
 func (s *persistentState) deleteLog(fromIndex, lasIndex uint64) {}
 
-func (s *persistentState) LastLogTerm() uint64 {
-	length := len(s.logs)
-	if 0 == length {
-		return 0
-	}
-	return s.logs[length-1].Term()
-}
-
 func (s *persistentState) matchLog(logIndex uint64, logTerm uint64) bool {
 	for i := len(s.logs) - 1; i >= 0; i-- {
-		if s.logs[i].Term() > logTerm {
-			continue
-		} else if s.logs[i].Term() < logTerm {
-			break
-		}
 		if s.logs[i].Index() > logIndex {
 			continue
 		} else if s.logs[i].Index() < logIndex {
 			break
 		}
-		return true
+		return s.logs[i].Term() == logTerm
 	}
 	return false
 }
 
-func (s *persistentState) LastLogIndex() uint64 {
+func (s *persistentState) lastLog() (logIndex, logTerm uint64) {
 	length := len(s.logs)
 	if 0 == length {
-		return 0
+		return 0, 0
 	}
-	return s.logs[length-1].Index()
+	return s.logs[length-1].Index(), s.logs[length-1].Term()
 }
