@@ -1,6 +1,10 @@
 package jsn_raft
 
-import "testing"
+import (
+	_ "embed"
+	"gopkg.in/yaml.v3"
+	"testing"
+)
 
 func TestNewRaft(t *testing.T) {
 	clusterNum = 5
@@ -17,6 +21,23 @@ func TestNewRaft(t *testing.T) {
 		go NewRaft(v, v, cluster)
 	}
 	globalWg.Wait()
+	for {
+
+	}
+}
+
+//go:embed test_server_list.yml
+var serverConfig []byte
+
+func TestNewRaftNew(t *testing.T) {
+	config := new(ServerConfig)
+	err := yaml.Unmarshal(serverConfig, config)
+	if nil != err {
+		panic(err)
+	}
+	for _, v := range config.List {
+		NewRaftNew(v.Who, *config)
+	}
 	for {
 
 	}

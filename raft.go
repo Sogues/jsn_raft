@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	follower = iota
+	follower int32 = iota
 	candidate
 	leader
 )
@@ -28,7 +28,7 @@ var (
 	globalWg      = sync.WaitGroup{}
 	clusterNum    = 5
 	AppendEntries = "AppendEntries"
-	Vote          = "Vote"
+	Vote          = "RaftNew.Vote"
 )
 
 type Raft struct {
