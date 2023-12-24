@@ -1,6 +1,9 @@
 package jsn_raft
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type JLogger interface {
 	Error(format string, params ...any)
@@ -13,7 +16,7 @@ type defaultLogger struct {
 }
 
 func (d defaultLogger) Debug(format string, params ...any) {
-	fmt.Printf("[Debug]"+format+"\n", params...)
+	fmt.Printf("[%v][Debug]"+format+"\n", append(append([]any{}, time.Now().String()), params...)...)
 }
 
 func (d defaultLogger) Panic(format string, params ...any) {
@@ -21,9 +24,9 @@ func (d defaultLogger) Panic(format string, params ...any) {
 }
 
 func (d defaultLogger) Info(format string, params ...any) {
-	fmt.Printf("[Info]"+format+"\n", params...)
+	fmt.Printf("[%v][Info]"+format+"\n", append(append([]any{}, time.Now().String()), params...)...)
 }
 
 func (d defaultLogger) Error(format string, params ...any) {
-	fmt.Printf("[Error]"+format+"\n", params...)
+	fmt.Printf("[%v][Error]"+format+"\n", append(append([]any{}, time.Now().String()), params...)...)
 }

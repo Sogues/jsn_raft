@@ -27,7 +27,7 @@ var (
 var (
 	globalWg      = sync.WaitGroup{}
 	clusterNum    = 5
-	AppendEntries = "AppendEntries"
+	AppendEntries = "RaftNew.AppendEntries"
 	Vote          = "RaftNew.Vote"
 )
 
@@ -67,7 +67,7 @@ func NewRaft(addr string, who string, cluster []string) *Raft {
 	if nil != err {
 		panic(err)
 	} else {
-		r.log.Info("rpc listen in %v", addr)
+		r.log.Info("handlerRpc listen in %v", addr)
 	}
 	svr := rpc.NewServer()
 	if err := svr.RegisterName("AppendEntries", r); nil != err {
@@ -126,7 +126,7 @@ type AppendEntriesResponse struct {
 func (r *Raft) AppendEntries(args *AppendEntriesRequest, reply *AppendEntriesResponse) error {
 	r.loopIn <- struct{}{}
 	reply.CurrentTerm, reply.Success = r.appendEntries(args.Term, args.LeaderId, args.PrevLogIndex, args.PrevLogTerm, args.Entries, args.LeaderCommit)
-	rpcInfo(args, reply, r.log, fmt.Sprintf("who:%v rpc AppendEntries ", r.addr))
+	rpcInfo(args, reply, r.log, fmt.Sprintf("who:%v handlerRpc AppendEntries ", r.addr))
 	<-r.loopOut
 	return nil
 }
@@ -146,7 +146,7 @@ type VoteResponse struct {
 func (r *Raft) Vote(args *VoteRequest, reply *VoteResponse) error {
 	r.loopIn <- struct{}{}
 	reply.CurrentTerm, reply.VoteGranted = r.vote(args.Term, args.CandidateId, args.LastLogIndex, args.LastLogTerm)
-	rpcInfo(args, reply, r.log, fmt.Sprintf("who:%v rpc Vote", r.addr))
+	rpcInfo(args, reply, r.log, fmt.Sprintf("who:%v handlerRpc Vote", r.addr))
 	<-r.loopOut
 	return nil
 }
@@ -188,7 +188,7 @@ func (r *Raft) loop() {
 				respCh := make(chan *VoteResponse, len(r.others))
 				for _, v := range r.others {
 					v := v
-					r.safeGo("vote rpc", func() {
+					r.safeGo("vote handlerRpc", func() {
 						resp := new(VoteResponse)
 						select {
 						case err := <-v.Go(Vote, vote, resp, nil).Done:
@@ -240,7 +240,7 @@ func (r *Raft) loop() {
 				respCh := make(chan *AppendEntriesResponse, len(r.others))
 				for _, v := range r.others {
 					v := v
-					r.safeGo("vote rpc", func() {
+					r.safeGo("vote handlerRpc", func() {
 						resp := new(AppendEntriesResponse)
 						select {
 						case err := <-v.Go(AppendEntries, req, resp, nil).Done:
